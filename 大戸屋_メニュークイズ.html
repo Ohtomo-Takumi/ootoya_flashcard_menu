@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大戸屋 メニュー学習クイズ Pro</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --success-color: #2ecc71;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 40px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; }
+
+        .stats-bar {
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin: 15px 0;
+        }
+
+        .main-container {
+            width: 90%;
+            max-width: 450px;
+        }
+
+        /* クイズカード */
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .question-txt {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .nutrition-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .nutrition-label { font-size: 0.7rem; color: #95a5a6; display: block; }
+        .nutrition-val { font-size: 1rem; font-weight: bold; color: var(--primary-color); }
+
+        .choices-area {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+        }
+
+        .choice-btn:active { transform: scale(0.98); }
+        .choice-btn.correct { background-color: var(--success-color); color: white; border-color: var(--success-color); }
+        .choice-btn.wrong { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+        .choice-btn:disabled { opacity: 0.8; cursor: default; }
+
+        /* 詳細カード */
+        #detail-card {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .detail-img {
+            width: 100%;
+            height: 200px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            object-fit: cover;
+        }
+
+        .detail-content { padding: 20px; }
+        .detail-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; border-left: 4px solid var(--primary-color); padding-left: 10px; }
+        
+        .full-nutrition { font-size: 0.9rem; line-height: 1.8; margin-bottom: 15px; border-top: 1px solid #eee; padding-top: 10px; }
+        .full-nutrition span { color: #666; width: 100px; display: inline-block; }
+
+        .note-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #856404;
+        }
+        .note-box strong { display: block; margin-bottom: 3px; }
+
+        .next-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>大戸屋メニュー学習クイズ Pro</h1>
+</header>
+
+<div class="stats-bar">
+    正解数: <span id="score">0</span> / <span id="total">0</span> 問
+</div>
+
+<div class="main-container">
+    <div class="quiz-card" id="quiz-area">
+        <div class="question-txt">Q. 以下の栄養素（白ご飯の場合）のメニューはどれ？</div>
+        <div class="nutrition-grid">
+            <div class="nutrition-item">
+                <span class="nutrition-label">熱量</span>
+                <span class="nutrition-val"><span id="q-cal">-</span><small>kcal</small></span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">たんぱく質</span>
+                <span class="nutrition-val"><span id="q-protein">-</span><small>g</small></span>
+            </div>
+            <div class="nutrition-item">
+                <span class="nutrition-label">脂質</span>
+                <span class="nutrition-val"><span id="q-fat">-</span><small>g</small></span>
+            </div>
+        </div>
+        <div class="choices-area" id="choices"></div>
+    </div>
+
+    <div id="detail-card">
+        <img id="d-img" class="detail-img" src="" alt="料理写真">
+        <div class="detail-content">
+            <div id="d-name" class="detail-title">メニュー名</div>
+            <div class="full-nutrition">
+                <div><span>糖質:</span> <strong id="d-carbs">-</strong> g</div>
+                <div><span>食物繊維:</span> <strong id="d-fiber">-</strong> g</div>
+                <div><span>食塩相当量:</span> <strong id="d-salt">-</strong> g</div>
+            </div>
+            <div class="note-box">
+                <strong>💡 現場の注意ポイント</strong>
+                <span id="d-note">注意点なし</span>
+            </div>
+            <button class="next-btn" onclick="initQuiz()">次の問題へ進む ▶</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 全39メニューのデータベース
+const menuData = [
+    { name: "洋食屋の鉄板ポークチャップ", cal: 1128, protein: 30.7, fat: 48.0, carbs: 107.2, fiber: 5.2, salt: 6.1, image: "img/洋食屋の鉄板ポークチャップ.jpg", note: "鉄板が熱いので提供時やけど注意！" },
+    { name: "懐かしの甘から照り焼きチキン", cal: 1400, protein: 51.8, fat: 66.5, carbs: 110.0, fiber: 3.8, salt: 6.4, image: "img/懐かしの甘から照り焼きチキン.jpg", note: "提供時、たれのハネに注意" },
+    { name: "鰆の西京焼き 菜の花からし和え添え", cal: 699, protein: 40.5, fat: 17.8, carbs: 89.6, fiber: 4.9, salt: 6.8, image: "img/鰆の西京焼き 菜の花からし和え添え.jpg", note: "菜の花の添え忘れに注意" },
+    { name: "鰹の梅はさみ揚げ", cal: 672, protein: 27.6, fat: 19.2, carbs: 92.7, fiber: 4.2, salt: 7.7, image: "img/鰹の梅はさみ揚げ.jpg", note: "梅の風味が飛ばないよう揚げ時間に注意" },
+    { name: "毎日定食", cal: 807, protein: 28.1, fat: 25.0, carbs: 106.2, fiber: 10.4, salt: 6.2, image: "img/毎日定食.jpg", note: "小鉢の付け忘れに注意" },
+    { name: "活力定食", cal: 1114, protein: 48.0, fat: 48.7, carbs: 109.9, fiber: 5.3, salt: 7.0, image: "img/活力定食.jpg", note: "ボリュームがあるため、盛り付けのバランスに注意" },
+    { name: "回復定食", cal: 852, protein: 26.8, fat: 42.6, carbs: 84.4, fiber: 11.9, salt: 6.4, image: "img/回復定食.jpg", note: "野菜の鮮度をチェック" },
+    { name: "すりおろし生しょうがの豚肩ロース生姜焼き", cal: 829, protein: 33.4, fat: 34.5, carbs: 86.1, fiber: 3.4, salt: 5.3, image: "img/すりおろし生しょうがの豚肩ロース生姜焼き.jpg", note: "マヨネーズは端に添える" },
+    { name: "大戸屋ランチ", cal: 908, protein: 26.4, fat: 35.2, carbs: 112.8, fiber: 4.9, salt: 4.2, image: "img/大戸屋ランチ.jpg", note: "定番メニューのため、迅速な提供を心がける" },
+    { name: "〈おかず増量〉大戸屋ランチ", cal: 1153, protein: 39.1, fat: 51.4, carbs: 122.9, fiber: 4.9, salt: 4.8, image: "img/〈おかず増量〉大戸屋ランチ.jpg", note: "通常版との取り違えに注意！" },
+    { name: "炭火 鶏トロ焼きとひじき入りつくねの月見重", cal: 947, protein: 54.7, fat: 36.4, carbs: 96.1, fiber: 5.5, salt: 6.3, image: "img/炭火 鶏トロ焼きとひじき入りつくねの月見重.jpg", note: "卵黄の破損に注意" },
+    { name: "大戸屋風チキン南蛮", cal: 1283, protein: 44.1, fat: 70.8, carbs: 107.2, fiber: 2.4, salt: 5.2, image: "img/大戸屋風チキン南蛮.jpg", note: "タルタルソースの量を確認" },
+    { name: "〈おかず増量〉大戸屋風チキン南蛮", cal: 1759, protein: 63.1, fat: 105.7, carbs: 125.7, fiber: 2.8, salt: 7.0, image: "img/〈おかず増量〉大戸屋風チキン南蛮.jpg", note: "増量分の盛り付けスペースを確保" },
+    { name: "すけそう鱈と野菜の黒酢あん", cal: 758, protein: 22.5, fat: 17.4, carbs: 119.7, fiber: 11.9, salt: 4.2, image: "img/すけそう鱈と野菜の黒酢あん.jpg", note: "※鶏の黒酢あんとお皿の形が違うので絶対確認！" },
+    { name: "〈おかず増量〉すけそう鱈と野菜の黒酢あん", cal: 872, protein: 28.9, fat: 20.2, carbs: 135.9, fiber: 12.0, salt: 5.2, image: "img/〈おかず増量〉すけそう鱈と野菜の黒酢あん.jpg", note: "通常サイズと間違えないよう伝票を再確認" },
+    { name: "鶏と野菜の黒酢あん", cal: 952, protein: 27.5, fat: 33.5, carbs: 123.3, fiber: 12.0, salt: 4.8, image: "img/鶏と野菜の黒酢あん.jpg", note: "※鱈の黒酢あんとお皿の形が違うので絶対確認！" },
+    { name: "〈おかず増量〉鶏と野菜の黒酢あん", cal: 1162, protein: 36.4, fat: 44.3, carbs: 141.3, fiber: 12.1, salt: 6.0, image: "img/〈おかず増量〉鶏と野菜の黒酢あん.jpg", note: "具材のバランスが偏らないように注意" },
+    { name: "鶏と野菜の黒酢あんとしまほっけの炭火焼き", cal: 780, protein: 32.5, fat: 22.7, carbs: 103.1, fiber: 9.9, salt: 4.7, image: "img/鶏と野菜の黒酢あんとしまほっけの炭火焼き.jpg", note: "コンビメニューのため、提供順序に配慮" },
+    { name: "もろみチキンの炭火焼きとほっけ竜田揚げ", cal: 755, protein: 33.2, fat: 23.0, carbs: 95.6, fiber: 5.2, salt: 6.1, image: "img/もろみチキンの炭火焼きとほっけ竜田揚げ.jpg", note: "香味ネギだれの掛け忘れに注意" },
+    { name: "大戸屋風チキン南蛮とひじき入り鶏つくね", cal: 1173, protein: 42.1, fat: 59.8, carbs: 108.2, fiber: 5.1, salt: 6.6, image: "img/大戸屋風チキン南蛮とひじき入り鶏つくね.jpg", note: "メインが2種あるため、盛り付けの向きを確認" },
+    { name: "生ニラだれの油淋鶏", cal: 1038, protein: 42.9, fat: 44.7, carbs: 105.7, fiber: 4.1, salt: 6.6, image: "img/生ニラだれの油淋鶏.jpg", note: "ニラだれが衣のサクサク感を損なわないよう直前に掛ける" },
+    { name: "〈おかず増量〉生ニラだれの油淋鶏", cal: 1374, protein: 60.6, fat: 66.1, carbs: 121.1, fiber: 4.3, salt: 9.1, image: "img/〈おかず増量〉生ニラだれの油淋鶏.jpg", note: "ボリュームが多いため、こぼれないよう注意" },
+    { name: "もろみチキンの炭火焼き", cal: 802, protein: 42.3, fat: 30.9, carbs: 78.3, fiber: 4.0, salt: 5.2, image: "img/もろみチキンの炭火焼き.jpg", note: "焦げすぎないよう炭火の火力を調整" },
+    { name: "〈おかず増量〉もろみチキンの炭火焼き", cal: 1019, protein: 59.8, fat: 45.4, carbs: 79.6, fiber: 4.2, salt: 6.7, image: "img/〈おかず増量〉もろみチキンの炭火焼き.jpg", note: "もろみの香りを活かす提供を" },
+    { name: "香味唐揚げ", cal: 955, protein: 37.1, fat: 40.3, carbs: 101.1, fiber: 3.8, salt: 4.5, image: "img/香味唐揚げ.jpg", note: "スパイスが均等にかかっているか確認" },
+    { name: "〈おかず増量〉香味唐揚げ", cal: 1206, protein: 49.9, fat: 56.7, carbs: 112.0, fiber: 3.9, salt: 5.3, image: "img/〈おかず増量〉香味唐揚げ.jpg", note: "唐揚げの個数を確認" },
+    { name: "甘からだれの鶏唐揚げ", cal: 1045, protein: 38.9, fat: 40.7, carbs: 120.9, fiber: 3.3, salt: 6.7, image: "img/甘からだれの鶏唐揚げ.jpg", note: "たれが服につかないよう、注意して運ぶ" },
+    { name: "〈おかず増量〉甘からだれの鶏唐揚げ", cal: 1345, protein: 52.6, fat: 57.5, carbs: 142.2, fiber: 3.6, salt: 8.8, image: "img/〈おかず増量〉甘からだれの鶏唐揚げ.jpg", note: "たれの量を増量分に合わせて調整" },
+    { name: "デミグラスチキンかつ", cal: 865, protein: 29.3, fat: 34.3, carbs: 101.2, fiber: 3.8, salt: 4.2, image: "img/デミグラスチキンかつ.jpg", note: "ソースが冷めないうちに提供" },
+    { name: "〈おかず増量〉デミグラスチキンかつ", cal: 1332, protein: 49.7, fat: 65.2, carbs: 124.3, fiber: 4.9, salt: 5.6, image: "img/〈おかず増量〉デミグラスチキンかつ.jpg", note: "カツの切り口を綺麗に見せる" },
+    { name: "鶏とれんこんのチリソース炒め", cal: 921, protein: 35.4, fat: 27.5, carbs: 127.8, fiber: 6.6, salt: 6.7, image: "img/鶏とれんこんのチリソース炒め.jpg", note: "れんこんの食感を残す炒め加減" },
+    { name: "三元豚のヒレかつ", cal: 980, protein: 46.5, fat: 36.1, carbs: 112.0, fiber: 5.9, salt: 4.9, image: "img/三元豚のヒレかつ.jpg", note: "中心まで火が通っているか確認" },
+    { name: "肉野菜塩こうじ炒め", cal: 809, protein: 22.6, fat: 40.2, carbs: 84.8, fiber: 5.9, salt: 5.7, image: "img/肉野菜塩こうじ炒め.jpg", note: "野菜の水分が出すぎないよう手早く炒める" },
+    { name: "ピリ辛本格マーボードーフ", cal: 674, protein: 26.7, fat: 19.9, carbs: 92.1, fiber: 3.7, salt: 5.2, image: "img/ピリ辛本格マーボードーフ.jpg", note: "豆腐を崩さないように混ぜる" },
+    { name: "豚トロみそ漬け炭火焼き", cal: 761, protein: 32.4, fat: 32.0, carbs: 87.8, fiber: 4.4, salt: 5.9, image: "img/豚トロみそ漬け炭火焼き.jpg", note: "脂が多いため、提供時の油はねに注意" },
+    { name: "茄子と豚肉のコク旨味噌炒め", cal: 785, protein: 21.9, fat: 36.9, carbs: 87.2, fiber: 6.2, salt: 3.3, image: "img/茄子と豚肉のコク旨味噌炒め.jpg", note: "茄子の色を綺麗に保つ" },
+    { name: "国産牛のスタミナ鉄板焼き", cal: 1049, protein: 28.9, fat: 58.4, carbs: 88.9, fiber: 5.1, salt: 5.0, image: "img/国産牛のスタミナ鉄板焼き.jpg", note: "香ばしい香りが立ち込める状態で提供" },
+    { name: "しまほっけの炭火焼き", cal: 612, protein: 45.5, fat: 13.1, carbs: 75.7, fiber: 3.6, salt: 5.4, image: "img/しまほっけの炭火焼き.jpg", note: "大根おろしを忘れずに" },
+    { name: "ほっけ竜田揚げ〜もろみ醤油の香味ネギだれ〜", cal: 681, protein: 21.3, fat: 17.2, carbs: 104.8, fiber: 5.1, salt: 6.7, image: "img/ほっけ竜田揚げ〜もろみ醤油の香味ネギだれ〜.jpg", note: "竜田揚げのサクサク感を維持" },
+    { name: "さばの炭火焼き", cal: 870, protein: 35.9, fat: 47.4, carbs: 76.1, fiber: 3.6, salt: 2.9, image: "img/さばの炭火焼き.jpg", note: "レモンを添える" },
+    { name: "バジルとチーズのアジフライ", cal: 1111, protein: 42.6, fat: 63.3, carbs: 90.0, fiber: 4.0, salt: 5.3, image: "img/バジルとチーズのアジフライ.jpg", note: "バジルの香りが引き立つ温度で" },
+    { name: "さばの味噌煮", cal: 739, protein: 36.9, fat: 26.9, carbs: 82.8, fiber: 2.3, salt: 3.9, image: "img/さばの味噌煮.jpg", note: "味噌だれをたっぷりかける" },
+    { name: "海老の玉子とじ重", cal: 886, protein: 33.1, fat: 25.4, carbs: 120.1, fiber: 3.5, salt: 6.9, image: "img/海老の玉子とじ重.jpg", note: "玉子の半熟具合を確認" },
+    { name: "大戸屋ばくだん丼", cal: 568, protein: 28.8, fat: 12.0, carbs: 77.6, fiber: 6.0, salt: 3.2, image: "img/大戸屋ばくだん丼.jpg", note: "具材の配置を美しく" },
+    { name: "もろみチキンの彩りサラダボウルとしそひじきご飯", cal: 684, protein: 26.8, fat: 19.1, carbs: 91.6, fiber: 6.7, salt: 4.8, image: "img/もろみチキンの彩りサラダボウルとしそひじきご飯.jpg", note: "野菜の彩りが均等になるように" },
+    { name: "豚ヒレの冷しゃぶ おろし柚香だれ", cal: 627, protein: 42.3, fat: 8.0, carbs: 93.7, fiber: 4.0, salt: 4.8, image: "img/豚ヒレの冷しゃぶ おろし柚香だれ.jpg", note: "肉が硬くならないよう、茹で時間に注意" },
+    { name: "辛旨 鶏とつくねのキムチチゲ", cal: 863, protein: 41.8, fat: 33.6, carbs: 89.1, fiber: 5.5, salt: 7.7, image: "img/辛旨 鶏とつくねのキムチチゲ.jpg", note: "吹きこぼれに注意し、熱々で提供" },
+    { name: "中華五目餡かけ土鍋ご飯", cal: 890, protein: 22.9, fat: 40.6, carbs: 102.3, fiber: 5.8, salt: 7.9, image: "img/中華五目餡かけ土鍋ご飯.jpg", note: "餡のとろみを均一にする" },
+    { name: "チキンかあさん煮", cal: 897, protein: 29.5, fat: 32.2, carbs: 110.0, fiber: 8.8, salt: 6.7, image: "img/チキンかあさん煮.jpg", note: "おろしを乗せて提供" }
+];
+
+let correctCount = 0;
+let totalQuestions = 0;
+let currentTarget = null;
+
+function initQuiz() {
+    // UIリセット
+    document.getElementById('detail-card').style.display = 'none';
+    document.getElementById('quiz-area').style.display = 'block';
+    
+    // 正解をランダムに選定
+    currentTarget = menuData[Math.floor(Math.random() * menuData.length)];
+    
+    // 問題文更新
+    document.getElementById('q-cal').textContent = currentTarget.cal;
+    document.getElementById('q-protein').textContent = currentTarget.protein;
+    document.getElementById('q-fat').textContent = currentTarget.fat;
+    
+    // 選択肢作成 (正解1 + 誤答3)
+    let choices = [currentTarget];
+    while(choices.length < 4) {
+        let dummy = menuData[Math.floor(Math.random() * menuData.length)];
+        if(!choices.includes(dummy)) choices.push(dummy);
+    }
+    choices.sort(() => Math.random() - 0.5); // シャッフル
+    
+    const container = document.getElementById('choices');
+    container.innerHTML = '';
+    choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = c.name;
+        btn.onclick = () => handleAnswer(btn, c);
+        container.appendChild(btn);
+    });
+}
+
+function handleAnswer(btn, selected) {
+    totalQuestions++;
+    const isCorrect = (selected.name === currentTarget.name);
+    
+    // 全ボタン無効化
+    const allBtns = document.querySelectorAll('.choice-btn');
+    allBtns.forEach(b => {
+        b.disabled = true;
+        if(b.textContent === currentTarget.name) b.classList.add('correct');
+    });
+
+    if(isCorrect) {
+        correctCount++;
+    } else {
+        btn.classList.add('wrong');
+    }
+
+    // スタッツ更新
+    document.getElementById('score').textContent = correctCount;
+    document.getElementById('total').textContent = totalQuestions;
+
+    // 詳細表示
+    setTimeout(showDetail, 600);
+}
+
+function showDetail() {
+    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('detail-card').style.display = 'block';
+    
+    document.getElementById('d-name').textContent = currentTarget.name;
+    document.getElementById('d-carbs').textContent = currentTarget.carbs;
+    document.getElementById('d-fiber').textContent = currentTarget.fiber;
+    document.getElementById('d-salt').textContent = currentTarget.salt;
+    document.getElementById('d-note').textContent = currentTarget.note;
+    
+    // 画像パス設定 (GitHub Pages前提の相対パス)
+    const imgEl = document.getElementById('d-img');
+    imgEl.src = currentTarget.image;
+    imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x200?text=No+Image'; };
+}
+
+// 初回起動
+initQuiz();
+
+</script>
+</body>
+</html>
