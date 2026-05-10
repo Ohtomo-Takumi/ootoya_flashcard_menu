@@ -48,112 +48,106 @@
         }
 
         .main-container {
-            width: 90%;
-            max-width: 450px;
+            width: 95%;
+            max-width: 500px; /* 少し横幅を広げました */
         }
 
-        /* クイズカード */
-        .quiz-card {
+        /* 出題・詳細共通のカードスタイル */
+        .card {
             background: var(--card-bg);
             border-radius: 15px;
-            padding: 20px;
+            overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             margin-bottom: 20px;
+            display: none; /* 初期は非表示、JSで制御 */
         }
 
-        .question-txt {
-            color: #7f8c8d;
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            text-align: center;
+        /* 写真エリア（大きく表示） */
+        .image-area {
+            width: 100%;
+            height: 280px; /* 写真を大きくしました */
+            background: #eee;
+            position: relative;
+        }
+
+        .image-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 枠いっぱいに綺麗に表示 */
+        }
+
+        .question-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .content-area {
+            padding: 20px;
         }
 
         .nutrition-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .nutrition-item {
             background: #f8f9fa;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
             text-align: center;
             border: 1px solid #eee;
         }
 
-        .nutrition-label { font-size: 0.7rem; color: #95a5a6; display: block; }
-        .nutrition-val { font-size: 1rem; font-weight: bold; color: var(--primary-color); }
+        .nutrition-label { font-size: 0.65rem; color: #95a5a6; display: block; }
+        .nutrition-val { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); }
 
         .choices-area {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .choice-btn {
             background: white;
             border: 2px solid #ddd;
             border-radius: 10px;
-            padding: 14px;
-            font-size: 0.95rem;
+            padding: 16px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: 0.2s;
-            text-align: left;
+            text-align: center;
         }
 
-        .choice-btn:active { transform: scale(0.98); }
         .choice-btn.correct { background-color: var(--success-color); color: white; border-color: var(--success-color); }
         .choice-btn.wrong { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
-        .choice-btn:disabled { opacity: 0.8; cursor: default; }
 
-        /* 詳細カード */
-        #detail-card {
-            display: none;
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            animation: slideUp 0.4s ease-out;
-        }
-
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .detail-img {
-            width: 100%;
-            height: 200px;
-            background: #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            object-fit: cover;
-        }
-
-        .detail-content { padding: 20px; }
-        .detail-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; border-left: 4px solid var(--primary-color); padding-left: 10px; }
-        
-        .full-nutrition { font-size: 0.9rem; line-height: 1.8; margin-bottom: 15px; border-top: 1px solid #eee; padding-top: 10px; }
-        .full-nutrition span { color: #666; width: 100px; display: inline-block; }
-
+        /* 詳細表示用 */
+        .detail-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; border-left: 5px solid var(--primary-color); padding-left: 12px; }
         .note-box {
             background: #fff3cd;
             border: 1px solid #ffeeba;
-            padding: 12px;
+            padding: 15px;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #856404;
+            margin-top: 15px;
         }
-        .note-box strong { display: block; margin-bottom: 3px; }
 
         .next-btn {
             background: var(--primary-color);
             color: white;
             border: none;
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             font-size: 1.1rem;
             font-weight: bold;
             border-radius: 10px;
@@ -173,37 +167,35 @@
 </div>
 
 <div class="main-container">
-    <div class="quiz-card" id="quiz-area">
-        <div class="question-txt">Q. 以下の栄養素（白ご飯の場合）のメニューはどれ？</div>
-        <div class="nutrition-grid">
-            <div class="nutrition-item">
-                <span class="nutrition-label">熱量</span>
-                <span class="nutrition-val"><span id="q-cal">-</span><small>kcal</small></span>
-            </div>
-            <div class="nutrition-item">
-                <span class="nutrition-label">たんぱく質</span>
-                <span class="nutrition-val"><span id="q-protein">-</span><small>g</small></span>
-            </div>
-            <div class="nutrition-item">
-                <span class="nutrition-label">脂質</span>
-                <span class="nutrition-val"><span id="q-fat">-</span><small>g</small></span>
-            </div>
+    <div id="quiz-card" class="card" style="display: block;">
+        <div class="image-area">
+            <div class="question-badge">Q. このメニューの名前は？</div>
+            <img id="q-img" src="" alt="料理写真">
         </div>
-        <div class="choices-area" id="choices"></div>
+        <div class="content-area">
+            <div class="nutrition-grid">
+                <div class="nutrition-item"><span class="nutrition-label">熱量</span><span class="nutrition-val"><span id="q-cal">-</span>kcal</span></div>
+                <div class="nutrition-item"><span class="nutrition-label">たんぱく質</span><span class="nutrition-val"><span id="q-protein">-</span>g</span></div>
+                <div class="nutrition-item"><span class="nutrition-label">脂質</span><span class="nutrition-val"><span id="q-fat">-</span>g</span></div>
+            </div>
+            <div class="choices-area" id="choices"></div>
+        </div>
     </div>
 
-    <div id="detail-card">
-        <img id="d-img" class="detail-img" src="" alt="料理写真">
-        <div class="detail-content">
+    <div id="detail-card" class="card">
+        <div class="image-area">
+            <img id="d-img" src="" alt="料理写真">
+        </div>
+        <div class="content-area">
             <div id="d-name" class="detail-title">メニュー名</div>
-            <div class="full-nutrition">
-                <div><span>糖質:</span> <strong id="d-carbs">-</strong> g</div>
-                <div><span>食物繊維:</span> <strong id="d-fiber">-</strong> g</div>
-                <div><span>食塩相当量:</span> <strong id="d-salt">-</strong> g</div>
+            <div class="nutrition-grid">
+                <div class="nutrition-item"><span class="nutrition-label">糖質</span><span class="nutrition-val"><span id="d-carbs">-</span>g</span></div>
+                <div class="nutrition-item"><span class="nutrition-label">食物繊維</span><span class="nutrition-val"><span id="d-fiber">-</span>g</span></div>
+                <div class="nutrition-item"><span class="nutrition-label">塩分</span><span class="nutrition-val"><span id="d-salt">-</span>g</span></div>
             </div>
             <div class="note-box">
                 <strong>💡 現場の注意ポイント</strong>
-                <span id="d-note">注意点なし</span>
+                <span id="d-note">-</span>
             </div>
             <button class="next-btn" onclick="initQuiz()">次の問題へ進む ▶</button>
         </div>
@@ -211,7 +203,7 @@
 </div>
 
 <script>
-// 全39メニューのデータベース
+// 全メニューデータ
 const menuData = [
     { name: "洋食屋の鉄板ポークチャップ", cal: 1128, protein: 30.7, fat: 48.0, carbs: 107.2, fiber: 5.2, salt: 6.1, image: "img/洋食屋の鉄板ポークチャップ.jpg", note: "鉄板が熱いので提供時やけど注意！" },
     { name: "懐かしの甘から照り焼きチキン", cal: 1400, protein: 51.8, fat: 66.5, carbs: 110.0, fiber: 3.8, salt: 6.4, image: "img/懐かしの甘から照り焼きチキン.jpg", note: "提供時、たれのハネに注意" },
@@ -269,25 +261,24 @@ let totalQuestions = 0;
 let currentTarget = null;
 
 function initQuiz() {
-    // UIリセット
     document.getElementById('detail-card').style.display = 'none';
-    document.getElementById('quiz-area').style.display = 'block';
+    document.getElementById('quiz-card').style.display = 'block';
     
-    // 正解をランダムに選定
     currentTarget = menuData[Math.floor(Math.random() * menuData.length)];
     
-    // 問題文更新
+    // 出題写真と栄養表示の更新
+    setImageSource('q-img', currentTarget.image);
     document.getElementById('q-cal').textContent = currentTarget.cal;
     document.getElementById('q-protein').textContent = currentTarget.protein;
     document.getElementById('q-fat').textContent = currentTarget.fat;
     
-    // 選択肢作成 (正解1 + 誤答3)
+    // 選択肢作成
     let choices = [currentTarget];
     while(choices.length < 4) {
         let dummy = menuData[Math.floor(Math.random() * menuData.length)];
         if(!choices.includes(dummy)) choices.push(dummy);
     }
-    choices.sort(() => Math.random() - 0.5); // シャッフル
+    choices.sort(() => Math.random() - 0.5);
     
     const container = document.getElementById('choices');
     container.innerHTML = '';
@@ -304,7 +295,6 @@ function handleAnswer(btn, selected) {
     totalQuestions++;
     const isCorrect = (selected.name === currentTarget.name);
     
-    // 全ボタン無効化
     const allBtns = document.querySelectorAll('.choice-btn');
     allBtns.forEach(b => {
         b.disabled = true;
@@ -317,16 +307,14 @@ function handleAnswer(btn, selected) {
         btn.classList.add('wrong');
     }
 
-    // スタッツ更新
     document.getElementById('score').textContent = correctCount;
     document.getElementById('total').textContent = totalQuestions;
 
-    // 詳細表示
-    setTimeout(showDetail, 600);
+    setTimeout(showDetail, 800);
 }
 
 function showDetail() {
-    document.getElementById('quiz-area').style.display = 'none';
+    document.getElementById('quiz-card').style.display = 'none';
     document.getElementById('detail-card').style.display = 'block';
     
     document.getElementById('d-name').textContent = currentTarget.name;
@@ -334,16 +322,20 @@ function showDetail() {
     document.getElementById('d-fiber').textContent = currentTarget.fiber;
     document.getElementById('d-salt').textContent = currentTarget.salt;
     document.getElementById('d-note').textContent = currentTarget.note;
-    
-    // 画像パス設定 (GitHub Pages前提の相対パス)
-    const imgEl = document.getElementById('d-img');
-    imgEl.src = currentTarget.image;
-    imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/400x200?text=No+Image'; };
+    setImageSource('d-img', currentTarget.image);
 }
 
-// 初回起動
-initQuiz();
+// 画像パスの設定とエラー時のフォールバック
+function setImageSource(imgId, src) {
+    const imgEl = document.getElementById(imgId);
+    imgEl.src = src;
+    imgEl.onerror = () => {
+        imgEl.src = 'https://via.placeholder.com/500x280?text=Image+Not+Found';
+        console.error("Failed to load image at: " + src);
+    };
+}
 
+initQuiz();
 </script>
 </body>
 </html>
